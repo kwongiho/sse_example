@@ -38,27 +38,16 @@ public class SSEventRegisterController {
 	@Async
 	@EventListener
 	public void handleMessage(EventObject event) {
-		//		clients.parallelStream()
-		//			.map(each -> {
-		//				try {
-		//					each.send(new EventObject(rndNo), MediaType.APPLICATION_JSON);
-		//					return null;
-		//				} catch (IOException ioe) {
-		//					return each;
-		//				}
-		//			}).filter(Objects::nonNull)
-		//			.forEach(clients::remove);
-
-		List<SseEmitter> deadEmitters = new ArrayList<>();
-		clients.forEach(sseEmitter -> {
-			try {
-				sseEmitter.send(event, MediaType.APPLICATION_JSON);
-			} catch (IOException ioe) {
-				deadEmitters.add(sseEmitter);
-			}
-		});
-		clients.removeAll(deadEmitters);
-
+		clients.parallelStream()
+			.map(each -> {
+				try {
+					each.send(event, MediaType.APPLICATION_JSON);
+					return null;
+				} catch (IOException ioe) {
+					return each;
+				}
+			}).filter(Objects::nonNull)
+			.forEach(clients::remove);
 	}
 
 }
